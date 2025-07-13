@@ -1,0 +1,11 @@
+# Core data and analysis libraries
+pandas
+numpy
+matplotlib
+statsmodels
+pandas-datareader
+yfinance
+pandas_ta
+
+# For suppressing warnings
+warnings

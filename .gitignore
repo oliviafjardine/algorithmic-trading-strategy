@@ -1,0 +1,65 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDEs and editors
+.vscode/
+*.swp
+*.bak
+*.tmp
+
+# OS files
+.DS_Store
+
+# Environments
+.env
+.envrc
+venv/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.coverage
+
+# Data files (ignore only in data/ directory)
+data/*.csv
+data/*.pkl
+data/*.h5
+data/*.xlsx
+data/*.xls
+data/*.txt
+data/*.dat
+data/*.json
+data/*.zip
+data/*.gz
+data/*.tar
+data/*.parquet
+data/*.log
+
+# More specific for your use case
+data/prices_*.pkl
+data/nasdaq_screener.csv
+data/stocks/
+
+# SQLite or other DBs
+*.sqlite3
+*.db
+
+# Miscellaneous
+*.log
+
+# Uncomment below if you have global logs or data folders outside data/
+# logs/
+# *.log
+
+# conda activate quant311
