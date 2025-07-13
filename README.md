@@ -24,7 +24,7 @@ This repository contains code and data for developing, analyzing, and backtestin
 ## Setup
 1. Clone the repository:
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/oliviafjardine/algorithmic-trading-strategy.git
    cd algorithmic-trading-strategy
    ```
 2. Create and activate a Python environment (optional):
@@ -49,8 +49,9 @@ This repository contains code and data for developing, analyzing, and backtestin
 
 ## Data Sources
 - Yahoo Finance (via yfinance)
-- Kaggle stock datasets
-- S&P 500 and NASDAQ symbol lists
+- [Kaggle Huge Stock Market Dataset](https://www.kaggle.com/datasets/borismarjanovic/price-volume-data-for-all-us-stocks-etfs#)
+- [Wikipedia S&P 500](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies)
+- [NASDAQ symbol lists](https://www.nasdaq.com/market-activity/stocks/screener)
 
 ## Notes
 - Data files are ignored by git (see `.gitignore`).
