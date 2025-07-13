@@ -2,6 +2,12 @@
 
 This repository contains code and data for developing, analyzing, and backtesting algorithmic trading strategies using Python.
 
+## Data Sources
+- Yahoo Finance (via yfinance)
+- [Kaggle Huge Stock Market Dataset](https://www.kaggle.com/datasets/borismarjanovic/price-volume-data-for-all-us-stocks-etfs#)
+- [Wikipedia S&P 500](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies)
+- [NASDAQ symbol lists](https://www.nasdaq.com/market-activity/stocks/screener)
+
 ## Project Structure
 
 - `main.py` — Main entry point for running trading strategies.
@@ -46,12 +52,6 @@ This repository contains code and data for developing, analyzing, and backtestin
   python scripts/download_data.py
   ```
 - To run analysis or backtests, use the corresponding scripts in the `scripts/` folder.
-
-## Data Sources
-- Yahoo Finance (via yfinance)
-- [Kaggle Huge Stock Market Dataset](https://www.kaggle.com/datasets/borismarjanovic/price-volume-data-for-all-us-stocks-etfs#)
-- [Wikipedia S&P 500](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies)
-- [NASDAQ symbol lists](https://www.nasdaq.com/market-activity/stocks/screener)
 
 ## Notes
 - Data files are ignored by git (see `.gitignore`).
