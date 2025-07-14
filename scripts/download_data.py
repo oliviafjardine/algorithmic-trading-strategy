@@ -1,4 +1,5 @@
 # scripts/download_data.py
+
 from statsmodels.regression.rolling import RollingOLS
 import pandas_datareader.data as web
 import matplotlib.pyplot as plt
@@ -7,7 +8,6 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 import yfinance as yf
-import pandas_ta
 import os
 import time
 import warnings
@@ -35,14 +35,15 @@ def load_nasdaq_symbols(path='data/nasdaq_screener.csv'):
 
 def filter_special_tickers(symbols):
     # Remove tickers with special chars like ^ or /
-    filtered = [s for s in symbols if '^' not in s and '/' not in s]
-    return filtered
+    return [s for s in symbols if '^' not in s and '/' not in s]
 
-def download_price_data(symbols, start_date, end_date, batch_size=20, sleep_secs=5):
-    cache_file = f"data/prices_{start_date}_to_{end_date}.pkl"
+def download_price_data(symbols, start_date, end_date, name="all", batch_size=20, sleep_secs=5):
+    cache_file = f"data/prices_{name}_{start_date}_to_{end_date}.pkl"
     if os.path.exists(cache_file):
         print(f"Loading cached data from {cache_file}")
-        return pd.read_pickle(cache_file)
+        df = pd.read_pickle(cache_file)
+        print(df.head())
+        return df
 
     dfs = []
     filtered_symbols = filter_special_tickers(symbols)
@@ -55,9 +56,30 @@ def download_price_data(symbols, start_date, end_date, batch_size=20, sleep_secs
         time.sleep(sleep_secs)
 
     combined_df = pd.concat(dfs, axis=1)
-    combined_df.to_pickle(cache_file)
+
+    # Flatten the MultiIndex: make each row (date, ticker, ...)
+    flat_df = combined_df.stack(level=1).reset_index()
+    flat_df = flat_df.rename(columns={'level_1': 'ticker', 'Date': 'date'})
+
+    # Lowercase all columns
+    flat_df.columns = [col.lower() for col in flat_df.columns]
+
+    # If 'adj close' is missing but 'close' exists, create it as a copy of 'close'
+    if 'adj close' not in flat_df.columns and 'close' in flat_df.columns:
+        flat_df['adj close'] = flat_df['close']
+
+    # Only keep and order the desired columns
+    columns = ['date', 'ticker', 'adj close', 'close', 'high', 'low', 'open', 'volume']
+    missing = [col for col in columns if col not in flat_df.columns]
+    if missing:
+        raise ValueError(f"Missing expected columns: {missing}")
+
+    flat_df = flat_df[columns]
+
+    flat_df.to_pickle(cache_file)
     print(f"Saved downloaded data to {cache_file}")
-    return combined_df
+    print(flat_df.head())
+    return flat_df
 
 def load_kaggle_stocks(kaggle_folder='data/stocks', start_date=None, end_date=None):
     files = [f for f in os.listdir(kaggle_folder) if f.endswith('.txt')]
@@ -65,26 +87,30 @@ def load_kaggle_stocks(kaggle_folder='data/stocks', start_date=None, end_date=No
     for file in files:
         filepath = os.path.join(kaggle_folder, file)
         if os.path.getsize(filepath) == 0:
-            print(f"Skipping empty file: {file}")
             continue
         try:
             df = pd.read_csv(filepath, delimiter=',')
         except pd.errors.EmptyDataError:
-            print(f"Skipping blank/malformed file: {file}")
             continue
         if df.shape[0] == 0 or df.shape[1] == 0:
-            print(f"Skipping file with no data: {file}")
             continue
-        df['Symbol'] = file.replace('.txt', '').upper()
+        df['ticker'] = file.replace('.txt', '').upper().split('.')[0]
         df['Date'] = pd.to_datetime(df['Date'])
+        df = df.rename(columns={'Date': 'date'})
         if start_date is not None and end_date is not None:
-            df = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
+            df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
         dfs.append(df)
     if len(dfs) == 0:
         raise ValueError("No valid stock data loaded from Kaggle dataset.")
-    return pd.concat(dfs, ignore_index=True)
-
-
+    combined = pd.concat(dfs, ignore_index=True)
+    combined.columns = [col.lower() for col in combined.columns]
+    if 'adj close' not in combined.columns and 'close' in combined.columns:
+        combined['adj close'] = combined['close']
+    columns = ['date', 'ticker', 'adj close', 'close', 'high', 'low', 'open', 'volume']
+    for col in columns:
+        if col not in combined.columns:
+            combined[col] = pd.NA
+    return combined[columns]
 
 def main():
     end_date = '2025-07-12'
@@ -94,16 +120,25 @@ def main():
     nasdaq_symbols = load_nasdaq_symbols()
 
     print("Downloading S&P 500 data...")
-    sp500_df = download_price_data(sp500_symbols, start_date, end_date)
-    print(sp500_df.head())
+    sp500_df = download_price_data(sp500_symbols, start_date, end_date, name='sp500')
+    print(sp500_df['ticker'].nunique())  # Unique number of tickers
+    print(sp500_df['date'].min(), sp500_df['date'].max())  # Date range
+    print(f"S&P 500 loaded: {sp500_df.shape}")
 
     print("Downloading NASDAQ data...")
-    nasdaq_df = download_price_data(nasdaq_symbols, start_date, end_date)
-    print(nasdaq_df.head())
+    nasdaq_df = download_price_data(nasdaq_symbols, start_date, end_date, name='nasdaq')
+    print(f"NASDAQ loaded: {nasdaq_df.shape}")
 
-    print("Loading Kaggle dataset...")
-    kaggle_df = load_kaggle_stocks(start_date=start_date, end_date=end_date)
-    print(kaggle_df.head())
+    # Merge and deduplicate if you want to backtest over both universes
+    combined = pd.concat([sp500_df, nasdaq_df]).drop_duplicates(subset=['date', 'ticker'])
+    print(f"Combined (merged) shape: {combined.shape}")
+    print(combined.head())
+
+    # If you want to load Kaggle data, uncomment below:
+    # print("Loading Kaggle dataset...")
+    # kaggle_df = load_kaggle_stocks(start_date=start_date, end_date=end_date)
+    # print(f"Kaggle loaded: {kaggle_df.shape}")
+    # print(kaggle_df.head())
 
 if __name__ == '__main__':
     main()
