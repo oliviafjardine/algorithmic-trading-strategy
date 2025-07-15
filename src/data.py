@@ -64,8 +64,11 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
     # Lowercase all columns
     flat_df.columns = [col.lower() for col in flat_df.columns]
 
-    # If 'adj close' is missing but 'close' exists, create it as a copy of 'close'
-    if 'adj close' not in flat_df.columns and 'close' in flat_df.columns:
+    # If 'adj close' exists but has NaN, fill those with 'close'
+    if 'adj close' in flat_df.columns and 'close' in flat_df.columns:
+        flat_df['adj close'] = flat_df['adj close'].fillna(flat_df['close'])
+    # If 'adj close' column is totally missing, create it as a copy of 'close'
+    elif 'close' in flat_df.columns:
         flat_df['adj close'] = flat_df['close']
 
     # Only keep and order the desired columns
