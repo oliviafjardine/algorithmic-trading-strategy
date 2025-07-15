@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import pytest
-
-from src.indicators import build_all_features, validate_dataframe 
+from src.indicators import build_all_features, validate_dataframe, add_daily_return, add_dollar_vol
 
 def make_sample_df():
     dates = pd.date_range('2024-01-01', periods=120)
@@ -31,13 +30,28 @@ def test_feature_columns_exist():
         assert col in features.columns, f"Missing feature: {col}"
 
 def test_outlier_clipping():
+    from src.indicators import clip_outliers
+    
     df = make_sample_df()
-    features = build_all_features(df)
+    df = add_daily_return(df)
+    df = add_dollar_vol(df)
+    
+    # Test clipping function directly
+    original_df = df.copy()
+    clipped_df = clip_outliers(df, ['daily_return', 'dollar_volume'])
+    
+    # Test that clipping worked
     for col in ['daily_return', 'dollar_volume']:
-        s = features[col].dropna()
-        q01, q99 = s.quantile(0.01), s.quantile(0.99)
-        assert (s >= q01 - 1e-8).all() and (s <= q99 + 1e-8).all()
-
+        for ticker in df.index.get_level_values(1).unique():
+            original_data = original_df.xs(ticker, level=1)[col].dropna()
+            clipped_data = clipped_df.xs(ticker, level=1)[col].dropna()
+            
+            if len(original_data) > 0:
+                q01, q99 = original_data.quantile(0.01), original_data.quantile(0.99)
+                # Test that clipped data respects original quantiles
+                assert (clipped_data >= q01 - 1e-8).all() and (clipped_data <= q99 + 1e-8).all(), \
+                    f"Outlier clipping failed for {col} in ticker {ticker}"
+                                 
 def test_missing_column_raises():
     df = make_sample_df()
     df = df.drop('adj close', axis=1)

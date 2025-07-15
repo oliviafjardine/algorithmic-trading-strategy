@@ -352,11 +352,18 @@ def add_momentum_indicators(df: pd.DataFrame, group_level: int = 1) -> pd.DataFr
             columns={'STOCHk_14_3_3': 'stoch_k', 'STOCHd_14_3_3': 'stoch_d'}
         )
     
-    stoch_results = df.groupby(level=group_level).apply(stoch_calc)
-    df['stoch_k'] = stoch_results['stoch_k'].values
-    df['stoch_d'] = stoch_results['stoch_d'].values
+    # Initialize columns with NaN
+    df['stoch_k'] = np.nan
+    df['stoch_d'] = np.nan
+    
+    # Calculate stochastic oscillator for each group
+    for group_name, group_data in df.groupby(level=group_level):
+        stoch_result = stoch_calc(group_data)
+        df.loc[group_data.index, 'stoch_k'] = stoch_result['stoch_k']
+        df.loc[group_data.index, 'stoch_d'] = stoch_result['stoch_d']
     
     return df
+
 
 def build_all_features(df: pd.DataFrame, group_level: int = 1, 
                       include_momentum: bool = True) -> pd.DataFrame:
@@ -382,7 +389,6 @@ def build_all_features(df: pd.DataFrame, group_level: int = 1,
     try:
         # Core features
         df = add_daily_return(df, group_level=group_level)
-        df = add_multi_horizon_returns(df, group_level=group_level)
         df = add_rolling_std(df, period=20, group_level=group_level)
         df = add_sma(df, period=20, group_level=group_level)
         df = add_ema(df, period=20, group_level=group_level)
@@ -393,14 +399,15 @@ def build_all_features(df: pd.DataFrame, group_level: int = 1,
         df = add_dollar_vol(df)
         df = garman_klass_vol(df)
         df = add_atr(df, group_level=group_level)
+        df = add_multi_horizon_returns(df, group_level=group_level)
         
         # Optional momentum indicators
         if include_momentum:
             df = add_momentum_indicators(df, group_level=group_level)
         
-        # Clip outliers in key columns
+        # Clip outliers in key columns - MUST be last step
         clip_columns = ['daily_return', 'dollar_volume'] + [f'{h}d_return' for h in [1,5,10,21,60]]
-        df = clip_outliers(df, clip_columns)
+        df = clip_outliers(df, clip_columns, group_level=group_level)
         
         print(f"Successfully added {len([col for col in df.columns if col not in ['open', 'high', 'low', 'close', 'adj close', 'volume']])} technical indicators")
         
@@ -410,27 +417,43 @@ def build_all_features(df: pd.DataFrame, group_level: int = 1,
     
     return df
 
-def clip_outliers(df: pd.DataFrame, columns: List[str], lower: float = 0.01, upper: float = 0.99) -> pd.DataFrame:
+
+def clip_outliers(df: pd.DataFrame, columns: List[str], lower: float = 0.01, upper: float = 0.99, group_level: int = 1) -> pd.DataFrame:
     """
-    Clips outliers in specified columns to the given quantiles.
+    Clips outliers in specified columns to the given quantiles, grouped by ticker.
     
     Args:
         df: DataFrame to clip outliers from
         columns: List of column names to clip
         lower: Lower quantile threshold (default: 0.01)
         upper: Upper quantile threshold (default: 0.99)
+        group_level: MultiIndex level for grouping (default: 1)
         
     Returns:
         DataFrame with outliers clipped
     """
     df = df.copy()
+    
     for col in columns:
         if col in df.columns:
-            q_low = df[col].quantile(lower)
-            q_high = df[col].quantile(upper)
-            df[col] = df[col].clip(lower=q_low, upper=q_high)
+            # Get all unique tickers
+            tickers = df.index.get_level_values(group_level).unique()
+            
+            for ticker in tickers:
+                # Get data for this ticker
+                mask = df.index.get_level_values(group_level) == ticker
+                ticker_data = df.loc[mask, col]
+                
+                if len(ticker_data.dropna()) > 0:
+                    # Calculate quantiles for this ticker
+                    q_low = ticker_data.quantile(lower)
+                    q_high = ticker_data.quantile(upper)
+                    
+                    # Clip values for this ticker
+                    df.loc[mask, col] = ticker_data.clip(lower=q_low, upper=q_high)
         else:
             warnings.warn(f"Column '{col}' not found in DataFrame, skipping outlier clipping")
+    
     return df
 
 def validate_dataframe(df: pd.DataFrame, required_cols: List[str] = None) -> bool:
