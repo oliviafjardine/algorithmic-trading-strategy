@@ -27,6 +27,36 @@ This repository contains code and data for developing, analyzing, and backtestin
 - Backtest trading strategies
 - Analyze results with statistical and technical indicators
 
+## Pipelines & APIs
+- **Data Download Pipeline:**
+  - Uses `yfinance` to fetch historical price data for S&P 500 and NASDAQ stocks.
+  - Loads Kaggle stock data from text files for additional coverage.
+  - Cleans and filters ticker symbols from Wikipedia and NASDAQ sources.
+  - Caches downloaded price data in `.pkl` files for faster repeated access.
+- **Backtesting Pipeline:**
+  - Loads price data and applies technical indicators and statistical features.
+  - Runs strategy logic and evaluates performance metrics.
+- **Analysis Pipeline:**
+  - Uses statistical models (`statsmodels`, `scipy`) and visualization (`matplotlib`).
+
+## Technical Indicators & Features
+- Garman-Klass volatility
+- RSI (Relative Strength Index)
+- Bollinger Bands
+- ATR (Average True Range)
+- MACD (Moving Average Convergence Divergence)
+- Daily returns, rolling standard deviation
+- SMA/EMA (Simple/Exponential Moving Average)
+- OBV (On-Balance Volume)
+- Dollar volume
+
+## Datasets
+- **Yahoo Finance:** Historical price data for US stocks (via `yfinance`)
+- **Kaggle Huge Stock Market Dataset:** Individual stock price files (`data/stocks/*.txt`)
+- **Wikipedia S&P 500:** Used for up-to-date S&P 500 symbol lists
+- **NASDAQ Screener:** Used for NASDAQ symbol lists (`data/nasdaq_screener.csv`)
+- **Cached Data:** Price data stored in `.pkl` files for efficiency
+
 ## Setup
 1. Clone the repository:
    ```bash
