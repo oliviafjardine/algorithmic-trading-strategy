@@ -81,6 +81,10 @@ This repository contains code and data for developing, analyzing, and backtestin
   ```bash
   python scripts/download_data.py
   ```
+- To run feature tests:
+  ```bash
+  python -m pytest tests/test_features.py -v
+  ```
 - To run analysis or backtests, use the corresponding scripts in the `scripts/` folder.
 
 ## Notes
