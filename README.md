@@ -85,6 +85,10 @@ This repository contains code and data for developing, analyzing, and backtestin
   ```bash
   python -m pytest tests/test_features.py -v
   ```
+- To run universe tests:
+  ```bash
+  python -m pytest tests/test_universe.py -v
+  ```
 - To run analysis or backtests, use the corresponding scripts in the `scripts/` folder.
 
 ## Notes
