@@ -61,21 +61,33 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
     flat_df = combined_df.stack(level=1).reset_index()
     flat_df = flat_df.rename(columns={'level_1': 'ticker', 'Date': 'date'})
 
-    # Lowercase all columns
-    flat_df.columns = [col.lower() for col in flat_df.columns]
+    # Standardize column names (handle all variations of adj close)
+    flat_df.columns = [
+        col.replace('Adj Close', 'adj close').replace('adjclose', 'adj close').lower()
+        for col in flat_df.columns
+    ]
 
-    # If 'adj close' exists but has NaN, fill those with 'close'
-    if 'adj close' in flat_df.columns and 'close' in flat_df.columns:
-        flat_df['adj close'] = flat_df['adj close'].fillna(flat_df['close'])
-    # If 'adj close' column is totally missing, create it as a copy of 'close'
-    elif 'close' in flat_df.columns:
+    print("Columns after flattening:", flat_df.columns.tolist())
+    print("Sample rows:\n", flat_df.head())
+
+    # Ensure 'close' exists
+    if 'close' not in flat_df.columns:
+        raise ValueError("No 'close' column found in downloaded data!")
+
+    # Ensure 'adj close' exists and is filled using 'close' as fallback
+    if 'adj close' not in flat_df.columns:
         flat_df['adj close'] = flat_df['close']
+    else:
+        flat_df['adj close'] = flat_df['adj close'].fillna(flat_df['close'])
+
+    print("'adj close' null count:", flat_df['adj close'].isnull().sum())
+    print("'close' null count:", flat_df['close'].isnull().sum())
 
     # Only keep and order the desired columns
     columns = ['date', 'ticker', 'adj close', 'close', 'high', 'low', 'open', 'volume']
-    missing = [col for col in columns if col not in flat_df.columns]
-    if missing:
-        raise ValueError(f"Missing expected columns: {missing}")
+    for col in columns:
+        if col not in flat_df.columns:
+            flat_df[col] = pd.NA  # Fill missing columns with NA
 
     flat_df = flat_df[columns]
 
@@ -83,6 +95,7 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
     print(f"Saved downloaded data to {cache_file}")
     print(flat_df.head())
     return flat_df
+
 
 def load_kaggle_stocks(kaggle_folder='data/stocks', start_date=None, end_date=None):
     files = [f for f in os.listdir(kaggle_folder) if f.endswith('.txt')]
