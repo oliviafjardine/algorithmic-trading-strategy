@@ -109,6 +109,51 @@ def add_dollar_vol(df, price_col='adj close'):
     df['dollar_volume'] = (df[price_col] * df['volume']) / 1e6
     return df
 
+def add_multi_horizon_returns(
+    df, 
+    horizons=[1, 5, 10, 21, 60], 
+    price_col='adj close', 
+    group_level=1, 
+    ticker_col='ticker'
+):
+    """
+    Adds return features for multiple time horizons to the DataFrame.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Price data, indexed by date and ticker (MultiIndex) or with columns.
+    horizons : list of int
+        List of lookback periods (in trading days) for which to calculate returns.
+    price_col : str, default 'adj close'
+        Column to use for return calculation.
+    group_level : int, default 1
+        Group index level for MultiIndex DataFrames (1 if [date, ticker]).
+    ticker_col : str, default 'ticker'
+        Name of the ticker column or index.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with new columns: '<N>d_return' for each N in horizons.
+    """
+    df = df.copy()
+    # Detect ticker location
+    is_multiindex = isinstance(df.index, pd.MultiIndex) and ticker_col in df.index.names
+    has_ticker_col = ticker_col in df.columns
+
+    if not is_multiindex and not has_ticker_col:
+        raise ValueError(f"Could not find '{ticker_col}' as index level or column in the DataFrame.")
+
+    for h in horizons:
+        colname = f'{h}d_return'
+        if is_multiindex:
+            df[colname] = df.groupby(level=group_level)[price_col].pct_change(periods=h)
+        else:
+            df[colname] = df.groupby(ticker_col)[price_col].pct_change(periods=h)
+    return df
+
+
 def build_all_features(df, group_level=1):
     """
     Add all core features/indicators for quant trading/backtesting.
@@ -116,6 +161,7 @@ def build_all_features(df, group_level=1):
     bb_low, bb_mid, bb_high, obv, dollar_volume, garman_klass_vol, atr.
     """
     df = add_daily_return(df, group_level=group_level)
+    df = add_multi_horizon_returns(df, group_level=group_level)
     df = add_rolling_std(df, period=20, group_level=group_level)
     df = add_sma(df, period=20, group_level=group_level)
     df = add_ema(df, period=20, group_level=group_level)
