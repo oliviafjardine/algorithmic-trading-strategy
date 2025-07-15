@@ -398,12 +398,39 @@ def build_all_features(df: pd.DataFrame, group_level: int = 1,
         if include_momentum:
             df = add_momentum_indicators(df, group_level=group_level)
         
+        # Clip outliers in key columns
+        clip_columns = ['daily_return', 'dollar_volume'] + [f'{h}d_return' for h in [1,5,10,21,60]]
+        df = clip_outliers(df, clip_columns)
+        
         print(f"Successfully added {len([col for col in df.columns if col not in ['open', 'high', 'low', 'close', 'adj close', 'volume']])} technical indicators")
         
     except Exception as e:
         print(f"Error building features: {str(e)}")
         raise
     
+    return df
+
+def clip_outliers(df: pd.DataFrame, columns: List[str], lower: float = 0.01, upper: float = 0.99) -> pd.DataFrame:
+    """
+    Clips outliers in specified columns to the given quantiles.
+    
+    Args:
+        df: DataFrame to clip outliers from
+        columns: List of column names to clip
+        lower: Lower quantile threshold (default: 0.01)
+        upper: Upper quantile threshold (default: 0.99)
+        
+    Returns:
+        DataFrame with outliers clipped
+    """
+    df = df.copy()
+    for col in columns:
+        if col in df.columns:
+            q_low = df[col].quantile(lower)
+            q_high = df[col].quantile(upper)
+            df[col] = df[col].clip(lower=q_low, upper=q_high)
+        else:
+            warnings.warn(f"Column '{col}' not found in DataFrame, skipping outlier clipping")
     return df
 
 def validate_dataframe(df: pd.DataFrame, required_cols: List[str] = None) -> bool:
