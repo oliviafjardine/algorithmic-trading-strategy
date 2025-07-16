@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pytest
-from src.features import build_all_features, validate_dataframe, add_daily_return, add_dollar_vol, clip_outliers
+from src.features.features import build_all_features, validate_dataframe, add_daily_return, add_dollar_vol, clip_outliers
 
 def make_sample_df():
     dates = pd.date_range('2024-01-01', periods=120)

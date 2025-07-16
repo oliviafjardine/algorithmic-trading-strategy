@@ -1,4 +1,4 @@
-from src.universe import filter_top_liquid
+from src.core.universe import filter_top_liquid
 import pandas as pd
 
 def main():

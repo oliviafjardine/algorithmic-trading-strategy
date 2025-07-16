@@ -1,7 +1,8 @@
-from src.features import (
+from src.features.features import (
     garman_klass_vol, rsi, add_bollinger_bands, 
     add_macd, add_momentum_indicators
 )
+from src.features.preprocessing import preprocess
 import pandas as pd
 
 def main():
@@ -20,6 +21,9 @@ def main():
         df = add_bollinger_bands(df)
         df = add_macd(df)
         df = add_momentum_indicators(df)
+
+        # Preprocess
+        df = preprocess(df)
         
         # Save featured data
         output_path = f'data/features_{name.lower()}.pkl'
@@ -29,6 +33,9 @@ def main():
         print("\nFeature columns:", sorted(df.columns.tolist()))
         print("\nSample data:")
         print(df.head())
+        print(f"{df.isna().any(axis=1).sum()} rows with NaN values out of {len(df)} total rows")
+
+
 
 if __name__ == '__main__':
     main()

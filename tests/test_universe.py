@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pytest
-from src.universe import filter_top_liquid
+from src.core.universe import filter_top_liquid
 
 
 class TestFilterTopLiquid:
