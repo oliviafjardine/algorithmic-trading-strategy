@@ -79,7 +79,7 @@ def add_bollinger_bands(df: pd.DataFrame, col: str = 'adj close', period: int = 
             'bb_high': bb.iloc[:,2]
         }, index=x.index)
     
-    bb_df = df.groupby(level=group_level)[col].apply(bb_group)
+    bb_df = df.groupby(level=group_level, group_keys=False)[col].apply(bb_group)
     for band in ['bb_low', 'bb_mid', 'bb_high']:
         df[band] = bb_df[band].values
     return df
@@ -140,7 +140,7 @@ def add_macd(df: pd.DataFrame, fast: int = 12, slow: int = 26, signal: int = 9,
             columns={'MACD_12_26_9':'macd', 'MACDs_12_26_9':'macd_signal'}
         )
     
-    macd_results = df.groupby(level=group_level)['adj close'].apply(macd_group)
+    macd_results = df.groupby(level=group_level, group_keys=False)['adj close'].apply(macd_group)
     df['macd'] = macd_results['macd'].values
     df['macd_signal'] = macd_results['macd_signal'].values
     return df
