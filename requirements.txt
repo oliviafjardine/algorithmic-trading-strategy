@@ -25,3 +25,6 @@ plotly>=5.15.0
 # Utilities
 tqdm>=4.65.0
 python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.0.0

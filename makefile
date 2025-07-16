@@ -20,7 +20,7 @@ backtest:
 	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/run_backtest.py
 
 test:
-	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) -m pytest tests/
+	PYTHONUNBUFFERED=1 $(ENV) pytest tests/ --disable-warnings -v
 
 clean:
 	rm -rf data/*.pkl data/*.parquet .pytest_cache
