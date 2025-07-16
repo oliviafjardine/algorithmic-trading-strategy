@@ -1,4 +1,4 @@
-from src.core.universe import filter_top_liquid
+from src.core.universe_filter import filter_top_liquid
 import pandas as pd
 
 def main():
@@ -12,7 +12,7 @@ def main():
         print(f"\nProcessing {name.upper()} universe...")
         
         # Load featured data
-        input_path = f'data/features_{name}.pkl'
+        input_path = f'data/processed/features_{name}.pkl'
         df = pd.read_pickle(input_path)
         
         # Filter for liquid stocks
@@ -23,7 +23,7 @@ def main():
         )
         
         # Save filtered universe
-        output_path = f'data/universe_{name}.pkl'
+        output_path = f'data/universe/universe_{name}.pkl'
         filtered_df.to_pickle(output_path)
         
         print(f"Universe saved to {output_path}")

@@ -16,6 +16,9 @@ download-data:
 features:
 	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/build_features.py
 
+universe:
+	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/build_universe.py
+
 backtest:
 	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/run_backtest.py
 

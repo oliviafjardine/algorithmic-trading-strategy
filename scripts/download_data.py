@@ -1,4 +1,4 @@
-from src.core.data import (
+from src.core.data_loader import (
     load_sp500_symbols, load_nasdaq_symbols,
     download_price_data, load_kaggle_stocks
 )

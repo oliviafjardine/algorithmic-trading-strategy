@@ -16,7 +16,7 @@ def load_sp500_symbols():
     return sp500['Symbol'].str.replace('.', '-', regex=False).tolist()
 
 
-def load_nasdaq_symbols(path='data/nasdaq_screener.csv'):
+def load_nasdaq_symbols(path='data/raw/nasdaq_screener.csv'):
     nasdaq = pd.read_csv(path)
     symbols = (
         nasdaq['Symbol']
@@ -37,7 +37,7 @@ def filter_special_tickers(symbols):
 
 
 def download_price_data(symbols, start_date, end_date, name="all", batch_size=20, sleep_secs=5):
-    cache_file = f"data/prices_{name}_{start_date}_to_{end_date}.pkl"
+    cache_file = f"data/raw/prices_{name}_{start_date}_to_{end_date}.pkl"
     if os.path.exists(cache_file):
         print(f"Loading cached data from {cache_file}")
         df = pd.read_pickle(cache_file)
@@ -99,7 +99,7 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
     return flat_df
 
 
-def load_kaggle_stocks(kaggle_folder='data/stocks', start_date=None, end_date=None):
+def load_kaggle_stocks(kaggle_folder='data/raw/stocks', start_date=None, end_date=None):
     files = [f for f in os.listdir(kaggle_folder) if f.endswith('.txt')]
     dfs = []
     for file in files:

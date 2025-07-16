@@ -1,15 +1,9 @@
 # Byte-compiled / optimized / DLL files
-.pytest_cache/
 __pycache__/
-*.pyc
 *.py[cod]
 *.pyo
 *.pyd
 *.pdb
-*.egg
-*.egg-info/
-dist/
-build/
 *.so
 
 # Jupyter Notebook checkpoints
@@ -24,7 +18,7 @@ build/
 # OS files
 .DS_Store
 
-# Environments
+# Python environments and test artifacts
 .env
 .envrc
 venv/
@@ -32,36 +26,33 @@ venv/
 .mypy_cache/
 .pytest_cache/
 .coverage
+*.egg
+*.egg-info/
+dist/
+build/
 
-# Data files (ignore only in data/ directory)
-data/*.csv
-data/*.pkl
-data/*.h5
-data/*.xlsx
-data/*.xls
-data/*.txt
-data/*.dat
-data/*.json
-data/*.zip
-data/*.gz
-data/*.tar
-data/*.parquet
-data/*.log
+# Data: ignore everything inside raw and processed
+data/raw/*
+data/processed/*
+data/universe/*
 
-# More specific for your use case
+# But keep folders tracked (if they exist)
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/universe/.gitkeep
+
+# Specific case exclusions (if not covered above)
 data/prices_*.pkl
 data/nasdaq_screener.csv
 data/stocks/
 
-# SQLite or other DBs
+# DBs & logs
 *.sqlite3
 *.db
-
-# Miscellaneous
 *.log
 
-# Uncomment below if you have global logs or data folders outside data/
-# logs/
-# *.log
+# Jupyter kernel & metadata
+.ipynb_checkpoints/
 
-# conda activate quant311
+# conda env marker
+conda activate quant311
