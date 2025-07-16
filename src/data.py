@@ -1,4 +1,4 @@
-# scripts/download_data.py
+# scripts/data.py
 
 from statsmodels.regression.rolling import RollingOLS
 import pandas as pd
@@ -9,10 +9,12 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
+
 def load_sp500_symbols():
     url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
     sp500 = pd.read_html(url)[0]
     return sp500['Symbol'].str.replace('.', '-', regex=False).tolist()
+
 
 def load_nasdaq_symbols(path='data/nasdaq_screener.csv'):
     nasdaq = pd.read_csv(path)
@@ -28,9 +30,11 @@ def load_nasdaq_symbols(path='data/nasdaq_screener.csv'):
     )
     return symbols
 
+
 def filter_special_tickers(symbols):
     # Remove tickers with special chars like ^ or /
     return [s for s in symbols if '^' not in s and '/' not in s]
+
 
 def download_price_data(symbols, start_date, end_date, name="all", batch_size=20, sleep_secs=5):
     cache_file = f"data/prices_{name}_{start_date}_to_{end_date}.pkl"
@@ -46,7 +50,8 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
     for i in range(0, len(filtered_symbols), batch_size):
         batch = filtered_symbols[i:i+batch_size]
         print(f"Downloading batch {i//batch_size + 1} of {total_batches}")
-        df_batch = yf.download(batch, start=start_date, end=end_date, progress=False)
+        df_batch = yf.download(batch, start=start_date,
+                               end=end_date, progress=False)
         dfs.append(df_batch)
         time.sleep(sleep_secs)
 
@@ -58,7 +63,8 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
 
     # Standardize column names (handle all variations of adj close)
     flat_df.columns = [
-        col.replace('Adj Close', 'adj close').replace('adjclose', 'adj close').lower()
+        col.replace('Adj Close', 'adj close').replace(
+            'adjclose', 'adj close').lower()
         for col in flat_df.columns
     ]
 
@@ -79,7 +85,8 @@ def download_price_data(symbols, start_date, end_date, name="all", batch_size=20
     print("'close' null count:", flat_df['close'].isnull().sum())
 
     # Only keep and order the desired columns
-    columns = ['date', 'ticker', 'adj close', 'close', 'high', 'low', 'open', 'volume']
+    columns = ['date', 'ticker', 'adj close',
+               'close', 'high', 'low', 'open', 'volume']
     for col in columns:
         if col not in flat_df.columns:
             flat_df[col] = pd.NA  # Fill missing columns with NA
@@ -117,14 +124,17 @@ def load_kaggle_stocks(kaggle_folder='data/stocks', start_date=None, end_date=No
     combined.columns = [col.lower() for col in combined.columns]
     if 'adj close' not in combined.columns and 'close' in combined.columns:
         combined['adj close'] = combined['close']
-    columns = ['date', 'ticker', 'adj close', 'close', 'high', 'low', 'open', 'volume']
+    columns = ['date', 'ticker', 'adj close',
+               'close', 'high', 'low', 'open', 'volume']
     for col in columns:
         if col not in combined.columns:
             combined[col] = pd.NA
     return combined[columns]
 
+
 def main():
     print("Data module started.")
+
 
 if __name__ == '__main__':
     main()

@@ -54,7 +54,7 @@ def main():
     print(f"  NASDAQ: {nasdaq_msg}")
 
     # --- Step 2: Feature Engineering ---
-    features_path = os.path.join('data', 'features_sp500.parquet')
+    features_path = os.path.join('data', 'features_sp500.pkl')
     if not os.path.exists(features_path):
         run_script("scripts/build_features.py", name="Feature Engineering")
         if not os.path.exists(features_path):

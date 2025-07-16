@@ -8,19 +8,19 @@ ENV=PYTHONPATH=$(PYTHONPATH)
 all: pipeline
 
 pipeline:
-	$(ENV) $(PYTHON) main.py
+	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) main.py
 
 download-data:
-	$(ENV) $(PYTHON) scripts/download_data.py
+	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/download_data.py
 
 features:
-	$(ENV) $(PYTHON) scripts/build_features.py
+	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/build_features.py
 
 backtest:
-	$(ENV) $(PYTHON) scripts/run_backtest.py
+	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) scripts/run_backtest.py
 
 test:
-	$(ENV) $(PYTHON) -m pytest tests/
+	PYTHONUNBUFFERED=1 $(ENV) $(PYTHON) -m pytest tests/
 
 clean:
 	rm -rf data/*.pkl data/*.parquet .pytest_cache
