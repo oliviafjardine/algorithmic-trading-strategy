@@ -22,8 +22,8 @@ backtest:
 test:
 	PYTHONUNBUFFERED=1 $(ENV) pytest tests/ --disable-warnings -v
 
-clean:
-	rm -rf data/*.pkl data/*.parquet .pytest_cache
+# clean:
+# 	rm -rf data/*.pkl data/*.parquet .pytest_cache
 
 venv:
 	conda create -y -n quant311 python=3.9

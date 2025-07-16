@@ -3,71 +3,103 @@
 This repository contains code and data for developing, analyzing, and backtesting algorithmic trading strategies using Python.
 
 ## Data Sources
-- Yahoo Finance (via yfinance)
-- [Kaggle Huge Stock Market Dataset](https://www.kaggle.com/datasets/borismarjanovic/price-volume-data-for-all-us-stocks-etfs#)
-- [Wikipedia S&P 500](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies)
-- [NASDAQ symbol lists](https://www.nasdaq.com/market-activity/stocks/screener)
+
+- **Yahoo Finance** (via `yfinance`): Historical price data for US stocks
+- **Kaggle Huge Stock Market Dataset**: Individual stock price files (`data/stocks/*.txt`)
+- **Wikipedia S&P 500**: Up-to-date S&P 500 symbol lists
+- **NASDAQ Screener**: NASDAQ symbol lists (`data/nasdaq_screener.csv`)
 
 ## Project Structure
 
-- `main.py` — Main entry point for running trading strategies.
+- `main.py` — Main entry point for running the full pipeline (data download, feature engineering, backtest)
 - `scripts/`
-  - `analysis.py` — Tools for analyzing trading results and market data.
-  - `backtest.py` — Backtesting framework for evaluating strategies.
-  - `download_data.py` — Scripts for downloading and processing market data.
+  - `download_data.py` — Download and process market data
+  - `build_features.py` — Build and save feature-engineered datasets
+  - `run_backtest.py` — (Template) Run backtests on strategies
+- `analysis/analysis.py` — (Template) Analyze backtest results
 - `data/`
-  - `nasdaq_screener.csv` — List of NASDAQ symbols.
-  - `prices_*.pkl` — Cached price data.
-  - `stocks/` — Individual stock data files.
+  - `nasdaq_screener.csv` — List of NASDAQ symbols
+  - `prices_*.pkl` — Cached price data
+  - `features_*.pkl` — Feature-engineered datasets
+  - `stocks/` — Individual stock data files (from Kaggle)
+- `src/`
+  - `core/` — Data loading, universe construction
+  - `features/` — Feature engineering and preprocessing
+  - `models/` — (Reserved for future model code)
+- `tests/` — Unit tests for features and universe logic
 
-## Features
-- Download historical price data for S&P 500 and NASDAQ stocks
-- Load and process Kaggle stock datasets
-- Filter and clean ticker symbols
-- Backtest trading strategies
-- Analyze results with statistical and technical indicators
+## Features & Technical Indicators
 
-## Pipelines & APIs
-- **Data Download Pipeline:**
-  - Uses `yfinance` to fetch historical price data for S&P 500 and NASDAQ stocks.
-  - Loads Kaggle stock data from text files for additional coverage.
-  - Cleans and filters ticker symbols from Wikipedia and NASDAQ sources.
-  - Caches downloaded price data in `.pkl` files for faster repeated access.
-- **Backtesting Pipeline:**
-  - Loads price data and applies technical indicators and statistical features.
-  - Runs strategy logic and evaluates performance metrics.
-- **Analysis Pipeline:**
-  - Uses statistical models (`statsmodels`, `scipy`) and visualization (`matplotlib`).
+Implemented in `src/features/features.py`:
 
-## Technical Indicators & Features
-- Garman-Klass volatility
-- RSI (Relative Strength Index)
-- Bollinger Bands
-- ATR (Average True Range)
-- MACD (Moving Average Convergence Divergence)
-- Daily returns, rolling standard deviation
-- SMA/EMA (Simple/Exponential Moving Average)
-- OBV (On-Balance Volume)
-- Dollar volume
+- **Garman-Klass Volatility**
+- **RSI (Relative Strength Index)**
+- **Bollinger Bands**
+- **ATR (Average True Range)**
+- **MACD (Moving Average Convergence Divergence)**
+- **Daily returns, multi-horizon returns**
+- **Rolling standard deviation**
+- **SMA/EMA (Simple/Exponential Moving Average)**
+- **OBV (On-Balance Volume)**
+- **Dollar volume**
+- **Momentum indicators**
+- **Outlier clipping, preprocessing**
 
-## Datasets
-- **Yahoo Finance:** Historical price data for US stocks (via `yfinance`)
-- **Kaggle Huge Stock Market Dataset:** Individual stock price files (`data/stocks/*.txt`)
-- **Wikipedia S&P 500:** Used for up-to-date S&P 500 symbol lists
-- **NASDAQ Screener:** Used for NASDAQ symbol lists (`data/nasdaq_screener.csv`)
-- **Cached Data:** Price data stored in `.pkl` files for efficiency
+## Data & Universe Construction
+
+- **Data loading**: From Yahoo Finance, Kaggle, and local cache (`src/core/data.py`)
+- **Universe filtering**: Top N most liquid stocks by rolling average dollar volume (`src/core/universe.py`)
+- **Preprocessing**: Sort, clean, and drop NaNs per ticker (`src/features/preprocessing.py`)
+
+## Pipelines
+
+### 1. Data Download Pipeline
+
+- Downloads historical price data for S&P 500 and NASDAQ stocks using `yfinance`
+- Loads Kaggle stock data for additional coverage
+- Cleans and filters ticker symbols
+- Caches price data in `.pkl` files for efficiency
+
+### 2. Feature Engineering Pipeline
+
+- Loads raw price data
+- Computes all technical indicators and features
+- Cleans and preprocesses data
+- Saves feature datasets to `data/features_*.pkl`
+
+### 3. Backtesting Pipeline
+
+- (Template) Loads featured data and runs backtest logic (to be implemented)
+
+### 4. Analysis Pipeline
+
+- (Template) Analyzes backtest results (to be implemented)
+
+## Makefile Commands
+
+You can use the Makefile to run common tasks:
+
+- `make pipeline` — Run the full pipeline (data download, feature engineering, backtest)
+- `make download-data` — Download and cache all market data
+- `make features` — Build and save feature-engineered datasets
+- `make backtest` — Run the backtesting script (template)
+- `make test` — Run all unit tests in `tests/`
+- `make clean` — Remove cached data files and test cache
+- `make venv` — Create a Conda environment and install dependencies
 
 ## Setup
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/oliviafjardine/algorithmic-trading-strategy.git
    cd algorithmic-trading-strategy
    ```
-2. Create and activate a Python environment (optional):
+2. Create and activate a Python environment (recommended: Conda Python 3.9 or 3.11):
    ```bash
+   # With venv
    python -m venv venv
    source venv/bin/activate
-   # or use conda
+   # Or with conda
    conda create -n quant311 python=3.11
    conda activate quant311
    ```
@@ -77,23 +109,55 @@ This repository contains code and data for developing, analyzing, and backtestin
    ```
 
 ## Usage
-- To download market data:
+
+### Run the Full Pipeline
+
+- Using the Makefile:
   ```bash
+  make pipeline
+  ```
+- Or directly:
+  ```bash
+  python main.py
+  ```
+
+### Individual Steps
+
+- **Download data:**
+  ```bash
+  make download-data
+  # or
   python scripts/download_data.py
   ```
-- To run feature tests:
+- **Build features:**
   ```bash
-  python -m pytest tests/test_features.py -v
+  make features
+  # or
+  python scripts/build_features.py
   ```
-- To run universe tests:
+- **Run backtest:**
   ```bash
-  python -m pytest tests/test_universe.py -v
+  make backtest
+  # or
+  python scripts/run_backtest.py
   ```
-- To run analysis or backtests, use the corresponding scripts in the `scripts/` folder.
+- **Run tests:**
+  ```bash
+  make test
+  # or
+  python -m pytest tests/
+  ```
+- **Clean cache/data:**
+  ```bash
+  make clean
+  ```
 
 ## Notes
+
 - Data files are ignored by git (see `.gitignore`).
 - Make sure you have an active internet connection for data downloads.
+- Backtest and analysis modules are currently templates/placeholders.
 
 ## License
+
 MIT License
