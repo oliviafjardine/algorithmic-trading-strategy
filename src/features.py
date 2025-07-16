@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pandas_ta as ta
-from typing import List, Optional, Union
+from typing import List, Optional
 import warnings
 
 def garman_klass_vol(df: pd.DataFrame) -> pd.DataFrame:
@@ -485,11 +485,7 @@ def validate_dataframe(df: pd.DataFrame, required_cols: List[str] = None) -> boo
     return True
 
 def main():
-    """
-    Example usage of the technical analysis library.
-    """
-    # This would typically be called with actual market data
-    pass
+    print("Indicators module started.")
 
 if __name__ == "__main__":
     main()

@@ -1,12 +1,7 @@
 # scripts/download_data.py
 
 from statsmodels.regression.rolling import RollingOLS
-import pandas_datareader.data as web
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
 import pandas as pd
-import numpy as np
-import datetime as dt
 import yfinance as yf
 import os
 import time
@@ -129,32 +124,7 @@ def load_kaggle_stocks(kaggle_folder='data/stocks', start_date=None, end_date=No
     return combined[columns]
 
 def main():
-    end_date = '2025-07-12'
-    start_date = (pd.to_datetime(end_date) - pd.DateOffset(years=10)).strftime('%Y-%m-%d')
-
-    sp500_symbols = load_sp500_symbols()
-    nasdaq_symbols = load_nasdaq_symbols()
-
-    print("Downloading S&P 500 data...")
-    sp500_df = download_price_data(sp500_symbols, start_date, end_date, name='sp500')
-    print(sp500_df['ticker'].nunique())  # Unique number of tickers
-    print(sp500_df['date'].min(), sp500_df['date'].max())  # Date range
-    print(f"S&P 500 loaded: {sp500_df.shape}")
-
-    print("Downloading NASDAQ data...")
-    nasdaq_df = download_price_data(nasdaq_symbols, start_date, end_date, name='nasdaq')
-    print(f"NASDAQ loaded: {nasdaq_df.shape}")
-
-    # Merge and deduplicate if you want to backtest over both universes
-    combined = pd.concat([sp500_df, nasdaq_df]).drop_duplicates(subset=['date', 'ticker'])
-    print(f"Combined (merged) shape: {combined.shape}")
-    print(combined.head())
-
-    # If you want to load Kaggle data, uncomment below:
-    # print("Loading Kaggle dataset...")
-    # kaggle_df = load_kaggle_stocks(start_date=start_date, end_date=end_date)
-    # print(f"Kaggle loaded: {kaggle_df.shape}")
-    # print(kaggle_df.head())
+    print("Data module started.")
 
 if __name__ == '__main__':
     main()

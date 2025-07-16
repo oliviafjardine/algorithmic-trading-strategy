@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import pytest
-from datetime import datetime, timedelta
 from src.universe import filter_top_liquid
 
 
