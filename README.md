@@ -1,4 +1,4 @@
-# Algorithmic Trading Strategy
+# Algorithmic Trading Strategy 
 
 This repository contains code and data for developing, analyzing, and backtesting algorithmic trading strategies using Python.
 
